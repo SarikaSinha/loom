@@ -1,7 +1,5 @@
 {
-  "answer": "The API allows 500 requests/minute.",
-  "sources": [
-    "limits.md"
-  ],
-  "confidence": 0.96
+  "status": "abstained",
+  "answer": "The indexed documents do not provide enough evidence to answer this question.",
+  "sources": []
 }

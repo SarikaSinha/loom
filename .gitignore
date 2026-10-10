@@ -218,3 +218,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Loom runtime data and local security-tool credentials
+.loom/
+.mend/
+artifacts/
+.env.*
+!.env.example

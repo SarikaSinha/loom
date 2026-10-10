@@ -1,0 +1,76 @@
+[build-system]
+requires = ["hatchling==1.32.4"]
+build-backend = "hatchling.build"
+
+[project]
+name = "loom-agentic-framework"
+version = "0.1.0"
+description = "An embedded Python framework for agents, tools, and workflows."
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+license = "Apache-2.0"
+dependencies = [
+  "pydantic==2.14.0",
+  "jsonschema==4.26.0",
+  "httpx==0.28.1",
+  "openai==3.28.0",
+  "anthropic==1.13.0",
+  "google-genai==2.29.0",
+  "pypdf==6.20.0",
+  "python-docx==1.2.0",
+  "markdown-it-py==4.2.0",
+  "fastembed==0.9.0",
+  "onnxruntime==1.23.2",
+  "numpy==2.3.5",
+  "tokenizers==0.23.3",
+  "portalocker==4.4.0",
+  "cryptography==50.0.2",
+]
+
+[project.scripts]
+loom = "loom.cli:main"
+
+[dependency-groups]
+dev = [
+  "hatchling==1.32.4",
+  "uv==0.13.0",
+  "pytest==9.1.1",
+  "pytest-asyncio==1.4.0",
+  "ruff==0.17.0",
+  "mypy==2.4.0",
+  "cyclonedx-bom==7.5.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/loom"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/src", "/tests", "/sdd", "/.github/scripts", "/pyproject.toml", "/uv.lock", "/README.md", "/LICENSE"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-ra -m 'not integration and not live'"
+markers = [
+  "integration: requires explicitly prepared local artifacts or services",
+  "live: requires explicitly provisioned hosted provider credentials",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src/loom"]
+
+[[tool.mypy.overrides]]
+module = ["jsonschema", "jsonschema.*"]
+ignore_missing_imports = true
+
+[tool.uv]
+required-version = "==0.13.0"

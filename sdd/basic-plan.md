@@ -10,7 +10,11 @@ must not silently change the contract, substitute a technology, or reduce scope.
 
 This document specifies work to implement; it does not claim that the framework
 exists, dependencies have been installed, or acceptance criteria already pass.
-The current task changes the plan only, not framework code or publication.
+Implementation is now authorized. By the subsequent implementation decision,
+coding and offline validation may proceed while external M0 security, provider
+and platform/hardware checks are pending. Those checks remain mandatory release
+blockers; this does not authorize incompatible dependency substitutions,
+weakened contracts, or publication.
 
 Sources, in precedence order:
 

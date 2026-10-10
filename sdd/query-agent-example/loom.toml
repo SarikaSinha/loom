@@ -1,0 +1,68 @@
+schema_version = 1
+
+[defaults]
+output_schema = "text"
+
+[defaults.limits]
+max_model_turns = 10
+max_tool_attempts = 20
+deadline_seconds = 120
+model_timeout_seconds = 30
+tool_timeout_seconds = 30
+approval_timeout_seconds = 60
+max_retries = 2
+max_corrections = 1
+max_context_bytes = 65536
+max_output_tokens = 2048
+max_observation_bytes = 8192
+max_tool_arguments_bytes = 8192
+
+[providers.primary]
+kind = "ollama"
+model = "qwen2.5:7b"
+model_digest = "sha256:845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e"
+server_version = "0.40.2"
+base_url = "http://127.0.0.1:11434"
+native_tool_calling = true
+structured_output = "json_schema"
+num_ctx = 32768
+num_gpu = 0
+num_thread = 4
+
+[agents.product_expert]
+provider = "primary"
+output_schema = "document_qa"
+
+[agents.product_expert.limits]
+deadline_seconds = 600
+model_timeout_seconds = 180
+max_context_bytes = 24576
+
+[agents.product_expert.document_access]
+product_docs = "local_only"
+
+[stores.product_docs]
+path = "./product-docs"
+index_path = ".loom/indexes/product_docs"
+
+[embeddings]
+backend = "fastembed"
+model = "BAAI/bge-small-en-v1.5"
+cache_path = ".loom/models"
+
+[storage]
+enabled = false
+backend = "sqlite"
+path = ".loom/state.sqlite.enc"
+
+[encryption]
+active_key_id = "primary"
+
+[encryption.keys]
+primary = "LOOM_ENCRYPTION_KEY"
+
+[observability]
+capture_payloads = false
+capture_source_paths = false
+jsonl_path = ""
+redact_keys = []
