@@ -60,10 +60,5 @@ Output
 ## Goal
 Create a plan document named loom/sdd/basic-plan.md which will detail the steps to be carried out to create the agentic framework
 
-## Workflow
-Solution is to provide a template, so that user provides the list of API changes(add/modify/delete) which is in the scope of current review.
-This API review tool should now take this file from user as an input and review the APIs only which was provided in the scope.
-
-
 ## Stop Condition
 Interview me relentlessly about every aspect of this plan until we reach a shared understanding.
