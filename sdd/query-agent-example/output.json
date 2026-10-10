@@ -1,0 +1,7 @@
+{
+  "answer": "The API allows 500 requests/minute.",
+  "sources": [
+    "limits.md"
+  ],
+  "confidence": 0.96
+}
