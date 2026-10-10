@@ -60,7 +60,5 @@ Output
 ## Goal
 Create a plan document named loom/sdd/basic-plan.md which will detail the steps to be carried out to create the agentic framework
 
-
-
 ## Stop Condition
 Interview me relentlessly about every aspect of this plan until we reach a shared understanding.
