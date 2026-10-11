@@ -283,7 +283,17 @@ class ToolRunner:
             if dispatched:
                 tool.phase(call.call_id, "timed_out_running")
             raise
-        except Exception:
+        except BaseException as exc:
+            # _HandoffSignal inherits from BaseException, not Exception, so it
+            # would not be caught by a plain `except Exception` — but be explicit.
+            from loom.tools.agent import _HandoffSignal
+
+            if isinstance(exc, _HandoffSignal):
+                raise
+            # All other non-Exception BaseExceptions (e.g. KeyboardInterrupt) propagate.
+            if not isinstance(exc, Exception):
+                raise
+            # Regular Exception subclasses land here.
             raise ToolFailure(
                 "unknown_tool_outcome" if dispatched and not spec.retry_safe else "tool_failed",
                 outcome_unknown=dispatched and not spec.retry_safe,

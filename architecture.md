@@ -114,6 +114,7 @@ The `_WorkflowRun` internal class drives execution: it advances the graph step b
 | `base.py` | `Tool` (ABC) | Claim/phase/release lifecycle; `Tool.from_callable` factory |
 | `function.py` | `FunctionTool` | Wraps a Python callable |
 | `http.py` | `HTTPTool` | Fixed-origin HTTPS calls; per-call auth from env vars |
+| `agent.py` | `AgentTool` | Wraps an `Agent` as a callable tool; supports suspend and handoff modes |
 | `approval.py` | — | Approval-request helpers |
 | `runner.py` | `ToolRunner` | Concurrent tool execution with retry, timeout, and egress enforcement |
 
@@ -199,7 +200,8 @@ Application code
       │
       ├──► Tool execution (tools/)
       │         ├── FunctionTool  (Python callable)
-      │         └── HTTPTool      (HTTPS fixed-origin)
+      │         ├── HTTPTool      (HTTPS fixed-origin)
+      │         └── AgentTool     (sub-agent delegation)
       │
       ├──► DocumentStore (documents/)
       │         ├── loaders → chunks → embeddings
@@ -241,3 +243,4 @@ Exit codes for index commands: **0** = complete, **2** = partial/exclusions, **1
 - **Sensitive tools denied headless.** Without an approval callback, sensitive tools are automatically denied.
 - **Immutable records.** All `contracts.py` types are strict, frozen Pydantic models; `AgentSpec` and `ToolSpec` are recursively immutable.
 - **Python 3.11–3.13 only.** Python 3.14 is explicitly unsupported.
+- **Sub-agent depth bounded.** `max_agent_depth` (default 5) and cycle detection via `_agent_chain` in `ToolContext.context` prevent unbounded recursive agent invocation.

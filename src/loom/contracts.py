@@ -155,6 +155,8 @@ class Limits(Record):
     max_output_tokens: int = Field(default=2048, gt=0)
     max_observation_bytes: int = Field(default=8192, ge=1024, le=1048576)
     max_tool_arguments_bytes: int = Field(default=8192, gt=0, le=1048576)
+    max_agent_calls: int = Field(default=20, gt=0)
+    max_agent_depth: int = Field(default=5, gt=0)
 
 
 class WorkflowLimits(Record):
@@ -256,6 +258,7 @@ class Usage(Record):
     output_tokens: int | None = 0
     complete: bool = True
     elapsed_ms: float = 0.0
+    agent_calls: int = 0
 
 
 class Diagnostic(Record):

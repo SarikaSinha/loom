@@ -456,7 +456,16 @@ class _Run:
         lease: OwnershipLease | None = None,
     ) -> None:
         self.agent, self.cp, self.adapter = agent, checkpoint, adapter
-        self.context = MappingProxyType(dict(context))
+        # Enrich context with depth-tracking keys used by AgentTool.
+        # Pass through any existing chain from a parent, then record this agent's name.
+        parent_chain: tuple[str, ...] = context.get("_agent_chain", ())  # type: ignore[assignment]
+        self.context = MappingProxyType(
+            {
+                **dict(context),
+                "_agent_chain": parent_chain,
+                "_parent_agent_name": agent.name,
+            }
+        )
         self.caller, self.cancellation = caller, cancellation
         self.limits = agent.limits
         self.persist, self.charge, self.step_id = persist, charge, step_id
@@ -767,6 +776,7 @@ class _Run:
                     "deadline_exhausted",
                     "model_turn_limit",
                     "tool_attempt_limit",
+                    "agent_call_limit",
                     "workflow_model_turn_limit",
                     "workflow_tool_attempt_limit",
                 }
@@ -774,6 +784,34 @@ class _Run:
             )
             failure = error if isinstance(error, ToolFailure) else ToolFailure(code)
             return await self.finish(status, error=failure, persist=code != "storage_write_failed")
+        except BaseException as _exc:
+            # _HandoffSignal inherits from BaseException (not Exception), so it is
+            # never matched by except (ToolFailure, ModelFailure) or CancelledError.
+            # Intercept it here to terminate the parent run cleanly on handoff=True.
+            from loom.tools.agent import _HandoffSignal
+
+            if not isinstance(_exc, _HandoffSignal):
+                raise
+            signal = _exc
+            self.usage(
+                agent_calls=self.cp.usage.agent_calls + 1,
+                input_tokens=(self.cp.usage.input_tokens or 0)
+                + (signal.result.usage.input_tokens or 0),
+                output_tokens=(self.cp.usage.output_tokens or 0)
+                + (signal.result.usage.output_tokens or 0),
+            )
+            handoff_diagnostic = Diagnostic(
+                code="agent_handoff",
+                message="Run handed off to sub-agent; terminal result adopted.",
+                origin="agent",
+                severity="info",
+                details={"sub_agent_run_id": signal.result.run_id},
+            )
+            return await self.finish(
+                "completed",
+                output=signal.output,
+                extra_diagnostics=(handoff_diagnostic,),
+            )
 
     async def model_turn(self) -> ModelResponse:
         if self.cp.model_response is not None:
@@ -874,6 +912,7 @@ class _Run:
 
     async def execute_tools(self, resume: bool) -> None:
         from loom.contracts import SearchResult
+        from loom.tools.agent import _HandoffSignal
 
         for index in range(self.cp.cursor, len(self.cp.pending)):
             self.check()
@@ -938,7 +977,8 @@ class _Run:
                         "tool.started", metadata={"call_id": self.cp.pending[index].call.call_id}
                     )
 
-                while True:
+                try:
+                  while True:
                     observation = await self.tool_runner.call(
                         operation.call,
                         context,
@@ -971,6 +1011,8 @@ class _Run:
                     )
                     self.check()
                     context = context.model_copy(update={"attempt": attempts + 1})
+                except _HandoffSignal:
+                    raise
             from loom.documents import SearchTool
 
             if isinstance(tool, SearchTool) and observation.error is None:
@@ -1009,6 +1051,15 @@ class _Run:
                 }
             )
             self.cp = self.cp.model_copy(update={"pending": tuple(pending), "cursor": index + 1})
+            # Agent call budget: count successful AgentTool invocations
+            if observation.execution_status == "succeeded":
+                from loom.tools.agent import AgentTool
+
+                if tool is not None and isinstance(tool, AgentTool):
+                    new_count = self.cp.usage.agent_calls + 1
+                    self.usage(agent_calls=new_count)
+                    if new_count > self.limits.max_agent_calls:
+                        raise ToolFailure("agent_call_limit")
             await self.save()
             await self.events.emit(
                 "tool.finished",
@@ -1037,6 +1088,7 @@ class _Run:
         output: JSONValue = None,
         error: ToolFailure | None = None,
         persist: bool = True,
+        extra_diagnostics: tuple[Diagnostic, ...] = (),
     ) -> RunResult:
         state = self.cp.state.model_copy(
             update={
@@ -1063,6 +1115,7 @@ class _Run:
                 *self.cp.diagnostics,
                 *self.tool_runner.diagnostics,
                 *self.events.diagnostics,
+                *extra_diagnostics,
             ),
         )
         phase = "needs_resolution" if error and error.outcome_unknown else status
@@ -1083,6 +1136,7 @@ class _Run:
                 *self.cp.diagnostics,
                 *self.tool_runner.diagnostics,
                 *self.events.diagnostics,
+                *extra_diagnostics,
             )
             if result.diagnostics != diagnostics:
                 result = result.model_copy(update={"diagnostics": diagnostics})
