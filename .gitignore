@@ -225,3 +225,6 @@ __marimo__/
 artifacts/
 .env.*
 !.env.example
+
+# macOS
+.DS_Store
