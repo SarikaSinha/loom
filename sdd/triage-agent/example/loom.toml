@@ -1,0 +1,52 @@
+schema_version = 1
+
+[defaults]
+provider = "primary"
+output_schema = "text"
+
+[defaults.limits]
+max_model_turns = 3
+max_tool_attempts = 1
+deadline_seconds = 600
+model_timeout_seconds = 180
+tool_timeout_seconds = 30
+approval_timeout_seconds = 60
+max_retries = 2
+max_corrections = 1
+max_context_bytes = 24576
+max_output_tokens = 2048
+max_observation_bytes = 8192
+max_tool_arguments_bytes = 8192
+
+[providers.primary]
+kind = "ollama"
+model = "qwen2.5:7b"
+model_digest = "sha256:845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e"
+server_version = "0.40.2"
+base_url = "http://127.0.0.1:11434"
+native_tool_calling = true
+structured_output = "json_schema"
+num_ctx = 32768
+num_gpu = 0
+num_thread = 4
+
+# Structured output schemas are supplied by the Python example.
+[agents.ticket_triage]
+provider = "primary"
+
+[agents.urgent_draft]
+provider = "primary"
+
+[agents.standard_draft]
+provider = "primary"
+
+[storage]
+enabled = false
+backend = "sqlite"
+path = ".loom/state.sqlite.enc"
+
+[observability]
+capture_payloads = false
+capture_source_paths = false
+jsonl_path = ""
+redact_keys = []
