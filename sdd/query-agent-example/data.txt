@@ -1,4 +1,4 @@
 product-docs/
-  api-guide.pdf
+  api-guide.md
   limits.md
-  faq.docx
+  faq.md
