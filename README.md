@@ -41,6 +41,8 @@ Before running:
 - Set `LOOM_ENCRYPTION_KEY` to a stable, externally managed, base64-encoded
   32-byte key. Do not commit or log it. Keep the same key available for future
   searches and refreshes; generating a new key does not decrypt old artifacts.
+  If the variable is absent, Loom generates a temporary key for the process and
+  prints a warning to stderr — encrypted data will not survive a restart.
 - Allow the explicit embedding setup command to download the pinned BGE
   artifacts over HTTPS. Indexing and querying do not download models.
 
@@ -78,7 +80,9 @@ Before running:
   the installed version, digest, and context metadata; it does not install
   Ollama or pull its models.
 - Set `LOOM_ENCRYPTION_KEY` to a stable, externally managed, base64-encoded
-  32-byte key.
+  32-byte key. If the variable is absent, Loom generates a temporary key for
+  the process and prints a warning to stderr — encrypted data will not survive
+  a restart.
 
 Then, from the repository root:
 
