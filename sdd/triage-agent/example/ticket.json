@@ -1,0 +1,3 @@
+{
+  "message": "All production API requests have returned HTTP 503 for the last 20 minutes. Our checkout is blocked."
+}

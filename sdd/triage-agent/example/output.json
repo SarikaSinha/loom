@@ -1,0 +1,8 @@
+{
+  "summary": "Production API requests have returned HTTP 503 for 20 minutes, blocking checkout.",
+  "category": "service_availability",
+  "priority": "critical",
+  "assigned_team": "API Reliability",
+  "draft_response": "Proposed urgent escalation to API Reliability for human review: the customer reports that all production API requests have returned HTTP 503 for 20 minutes and checkout is blocked. Please investigate service availability and assess the reported impact. The cause and recovery time are not yet known.",
+  "next_action": "human_review"
+}
