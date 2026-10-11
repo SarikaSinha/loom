@@ -22,6 +22,7 @@ from loom.contracts import (
 )
 from loom.documents import DocumentStore
 from loom.storage import JSONStorage, SQLiteStorage, Storage
+from loom.tools.agent import AgentTool
 from loom.tools.base import Tool
 from loom.tools.http import HTTPTool
 from loom.workflows import Branch, Case, Step, Workflow, WorkflowView
@@ -29,6 +30,7 @@ from loom.workflows import Branch, Case, Step, Workflow, WorkflowView
 __all__ = [
     "Agent",
     "AgentSpec",
+    "AgentTool",
     "Tool",
     "HTTPTool",
     "DocumentStore",

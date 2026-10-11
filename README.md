@@ -66,6 +66,33 @@ chunks. `output.json` illustrates an abstention's output shape; it is not a
 recorded provider response or evidence that the reference example has passed
 live acceptance.
 
+## Run the tool-using agent example
+
+The [reference directory](sdd/tool-agent-example/) demonstrates an agent that
+calls Python tools directly — no document store or embeddings required.
+
+Before running:
+
+- Provision the pinned Ollama server and model explicitly: server `0.40.2`,
+  model `qwen2.5:7b`, and the exact model digest in `loom.toml`. Loom checks
+  the installed version, digest, and context metadata; it does not install
+  Ollama or pull its models.
+- Set `LOOM_ENCRYPTION_KEY` to a stable, externally managed, base64-encoded
+  32-byte key.
+
+Then, from the repository root:
+
+```sh
+cd sdd/tool-agent-example
+../../.venv/bin/python developer-code.py
+```
+
+The agent is given three pure-Python tools — `word_count`, `char_count`, and
+`reverse_text` — and answers a question that requires calling several of them.
+The script prints a `RunResult`; the plain-text answer is under `output`.
+All tools declare `sensitive=False` and `egress="none"`, so no approval
+callback is needed and no outbound network access occurs.
+
 ## Tools and workflows
 
 Tools are explicitly attached in code. Sensitive tools require approval;
