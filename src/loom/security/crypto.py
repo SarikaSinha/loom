@@ -5,6 +5,7 @@ import binascii
 import hashlib
 import os
 import struct
+import sys
 from pathlib import Path
 from typing import Literal
 
@@ -67,9 +68,18 @@ class Crypto:
         encryption = self.config.encryption
         if encryption is None or key_id not in encryption.keys:
             raise LoomConfigurationError("encryption_key_unavailable")
-        encoded = os.environ.get(encryption.keys[key_id])
+        env_var = encryption.keys[key_id]
+        encoded = os.environ.get(env_var)
         if encoded is None:
-            raise LoomConfigurationError("encryption_key_unavailable")
+            generated = base64.b64encode(os.urandom(32)).decode("ascii")
+            os.environ[env_var] = generated
+            encoded = generated
+            print(
+                f"loom: {env_var} not set — generated a temporary encryption key for this "
+                "process. Data encrypted now cannot be decrypted after restart. "
+                f"Set {env_var} to a stable base64-encoded 32-byte key to persist data.",
+                file=sys.stderr,
+            )
         try:
             value = base64.b64decode(encoded, validate=True)
         except (ValueError, binascii.Error):
