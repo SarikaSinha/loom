@@ -1,4 +1,4 @@
-# Loom Architecture
+# Loom Repo Architecture
 
 Loom is an embedded Python framework for agents, tools, document retrieval, and sequential workflows. It is distributed as the `loom-agentic-framework` package and imported as `loom`. The entry-point binary is `loom` (mapped to [`loom.cli:main`](src/loom/cli.py)).
 
